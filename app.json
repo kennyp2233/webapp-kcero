@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "jsEngine": "hermes",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icons/1024.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -22,13 +22,36 @@
       "**/*"
     ],
     "ios": {
-      "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.kceroapp",
       "infoPlist": {
-        "CFBundleIconName": "AppIcon"
+        "NSLocationWhenInUseUsageDescription": "Esta aplicación necesita acceder a tu ubicación para mostrar contenido relevante.",
+        "NSCameraUsageDescription": "Se requiere acceso a la cámara.",
+        "NSPhotoLibraryUsageDescription": "Se requiere acceso a la galería de fotos.",
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleIconName": "AppIcon",
+        "UILaunchStoryboardName": "LaunchScreen",
+        "UIRequiredDeviceCapabilities": [
+          "arm64"
+        ],
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ],
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSExceptionDomains": {
+            "kcero.shop": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSExceptionRequiresForwardSecrecy": false
+            }
+          },
+          "NSAllowsLocalNetworking": true
+        }
       }
-      
     },
     "android": {
       "package": "com.anonymous.kceroapp",
