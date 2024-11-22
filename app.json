@@ -1,4 +1,46 @@
 {
   "name": "KceroApp",
-  "displayName": "KceroApp"
+  "displayName": "KceroApp",
+  "expo": {
+    "name": "KceroApp",
+    "slug": "kceroapp",
+    "version": "1.0.0",
+    "scheme": "myapp",
+    "jsEngine": "hermes",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/e5696d33-e818-428e-a83d-194759dc7637"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.kceroapp",
+      "infoPlist": {
+        "CFBundleIconName": "AppIcon"
+      }
+      
+    },
+    "android": {
+      "package": "com.anonymous.kceroapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "runtimeVersion": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "e5696d33-e818-428e-a83d-194759dc7637"
+      }
+    }
+  }
 }

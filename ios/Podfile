@@ -20,6 +20,7 @@ target 'KceroApp' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
+    :hermes_enabled => true, # Asegúrate de que esté en true
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 

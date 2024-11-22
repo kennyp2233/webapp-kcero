@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Esta aplicación necesita acceder a tu ubicación para mostrar contenido relevante.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Se requiere acceso a la cámara.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Se requiere acceso a la galería de fotos.</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -26,13 +33,27 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
+		<!-- Excepción para el dominio específico kcero.shop -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>kcero.shop</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<!-- Solo permite HTTP si es necesario -->
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<!-- Configuración para uso de localStorage en el WebView -->
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+			</dict>
+		</dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
+
 	<string></string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -48,5 +69,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+
 </dict>
 </plist>
