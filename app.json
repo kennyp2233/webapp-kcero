@@ -22,6 +22,7 @@
       "**/*"
     ],
     "ios": {
+      "icon": "./assets/icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.kceroapp",
       "infoPlist": {
