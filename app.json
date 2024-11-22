@@ -23,7 +23,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.kceroapp",
+      "bundleIdentifier": "org.reactjs.native.example.KceroApp",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Esta aplicación necesita acceder a tu ubicación para mostrar contenido relevante.",
         "NSCameraUsageDescription": "Se requiere acceso a la cámara.",
