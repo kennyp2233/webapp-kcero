@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "jsEngine": "hermes",
     "orientation": "portrait",
-    "icon": "./assets/icons/1024.png",
+    "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
