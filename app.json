@@ -1,6 +1,7 @@
 {
   "name": "KceroApp",
   "displayName": "KceroApp",
+  "newArchEnabled": true,
   "expo": {
     "name": "KceroApp",
     "slug": "kceroapp",
@@ -41,7 +42,7 @@
         ],
         "UIViewControllerBasedStatusBarAppearance": false,
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": false,
+          "NSAllowsArbitraryLoads": true,
           "NSExceptionDomains": {
             "kcero.shop": {
               "NSIncludesSubdomains": true,
@@ -65,6 +66,7 @@
       "eas": {
         "projectId": "e5696d33-e818-428e-a83d-194759dc7637"
       }
-    }
+    },
+    "owner": "kennyp2233"
   }
 }
