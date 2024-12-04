@@ -11,6 +11,7 @@ import {
   Button,
   Animated,
   Easing,
+  Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
@@ -23,8 +24,12 @@ const App: React.FC = () => {
   const [canGoBack, setCanGoBack] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(true);
-  const splashAnimation = useRef(new Animated.Value(1)).current; // Opacidad inicial de 1
-  const logoScale = useRef(new Animated.Value(0)).current; // Escala inicial del logotipo
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const splashAnimation = useRef(new Animated.Value(1)).current;
+  const logoScale = useRef(new Animated.Value(0)).current;
+  const MAX_RETRIES = 3;
+  const TIMEOUT_DURATION = 30000;
 
   const BASE_URL = 'https://kcero.shop/';
 
@@ -32,12 +37,17 @@ const App: React.FC = () => {
     console.log('Inicializando la aplicación...');
 
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsConnected(state.isConnected ?? false);
-      console.log('Conexión a internet:', state.isConnected);
-      if (!state.isConnected) {
+      const isConnectedNow = state.isConnected ?? false;
+      setIsConnected(isConnectedNow);
+      console.log('Conexión a internet:', isConnectedNow);
+
+      if (!isConnectedNow) {
         console.warn('La aplicación ha perdido la conexión a internet.');
       } else {
         console.log('La conexión a internet se ha restablecido.');
+        if (hasError) {
+          handleRetry();
+        }
       }
     });
 
@@ -46,7 +56,34 @@ const App: React.FC = () => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
     console.log('Suscrito al evento de retroceso de Android.');
 
-    // Iniciar animación del logotipo
+    startLogoAnimation();
+
+    return () => {
+      unsubscribe();
+      backHandler.remove();
+      console.log('Desuscrito de los eventos de conectividad y retroceso.');
+    };
+  }, [hasError]);
+
+  useEffect(() => {
+    let loadTimeout: NodeJS.Timeout;
+
+    if (loading) {
+      loadTimeout = setTimeout(() => {
+        console.warn('WebView: La carga está tardando demasiado.');
+        Alert.alert('Tiempo de carga excedido', 'La página está tardando demasiado en cargar.');
+        hideSplash();
+      }, TIMEOUT_DURATION); // 30 segundos
+    }
+
+    return () => {
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+      }
+    };
+  }, [loading]);
+
+  const startLogoAnimation = () => {
     Animated.sequence([
       Animated.timing(logoScale, {
         toValue: 1,
@@ -67,31 +104,7 @@ const App: React.FC = () => {
         easing: Easing.ease,
       }),
     ]).start();
-
-    return () => {
-      unsubscribe();
-      backHandler.remove();
-      console.log('Desuscrito de los eventos de conectividad y retroceso.');
-    };
-  }, []);
-
-  useEffect(() => {
-    let loadTimeout: NodeJS.Timeout;
-
-    if (loading) {
-      loadTimeout = setTimeout(() => {
-        console.warn('WebView: La carga está tardando demasiado.');
-        Alert.alert('Tiempo de carga excedido', 'La página está tardando demasiado en cargar.');
-        hideSplash();
-      }, 30000); // 30 segundos
-    }
-
-    return () => {
-      if (loadTimeout) {
-        clearTimeout(loadTimeout);
-      }
-    };
-  }, [loading]);
+  };
 
   const requestLocationPermission = async () => {
     try {
@@ -162,8 +175,15 @@ const App: React.FC = () => {
   const handleError = (syntheticEvent: any) => {
     const { nativeEvent } = syntheticEvent;
     console.error('WebView error:', nativeEvent);
-    hideSplash();
-    Alert.alert('Error al cargar la página', nativeEvent.description);
+
+    if (Platform.OS === 'ios' && nativeEvent.code === -1001) {
+      // Timeout específico para iOS
+      setHasError(true);
+      hideSplash();
+    } else {
+      setHasError(true);
+      hideSplash();
+    }
   };
 
   const handleLoad = () => {
@@ -207,9 +227,9 @@ const App: React.FC = () => {
 
   const injectedJavaScript = `
     window.onerror = function(message, source, lineno, colno, error) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ message, source, lineno, colno, error }));
-  };
-  true;
+      window.ReactNativeWebView.postMessage(JSON.stringify({ message, source, lineno, colno, error }));
+    };
+    true;
   `;
 
   const renderLoading = () => {
@@ -242,31 +262,61 @@ const App: React.FC = () => {
     });
   };
 
-  if (!isConnected) {
-    console.warn('Mostrando pantalla de sin conexión.');
+  const handleRetry = () => {
+    if (retryCount < MAX_RETRIES) {
+      setRetryCount(prev => prev + 1);
+      setHasError(false);
+      setLoading(true);
+      if (webViewRef.current) {
+        webViewRef.current.reload();
+        console.log(`Reintentando carga del WebView (Intento ${retryCount + 1})`);
+      }
+    } else {
+      Alert.alert(
+        'Error de conexión',
+        'No se ha podido establecer conexión después de varios intentos. ¿Desea intentar nuevamente?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel'
+          },
+          {
+            text: 'Reintentar',
+            onPress: () => {
+              setRetryCount(0);
+              handleRetry();
+            }
+          }
+        ]
+      );
+    }
+  };
+
+  const ErrorView = () => (
+    <View style={styles.errorContainer}>
+      <Image
+        source={require('./assets/icon.png')}
+        style={styles.logo}
+      />
+      <Text style={styles.errorText}>
+        Lo sentimos, ha ocurrido un error al cargar la página
+      </Text>
+      <Text style={styles.errorSubText}>
+        Por favor, verifica tu conexión e intenta nuevamente
+      </Text>
+      <Button
+        title="Reintentar"
+        onPress={handleRetry}
+      />
+    </View>
+  );
+
+  if (!isConnected || hasError) {
+    console.warn('Mostrando pantalla de sin conexión o error.');
     return (
       <SafeAreaProvider>
-        <SafeAreaView style={styles.noConnectionContainer}>
-          <Image
-            source={require('./assets/icon.png')}
-            style={styles.logo}
-          />
-          <Text style={styles.noConnectionText}>
-            No hay conexión a internet.
-          </Text>
-          <Text style={styles.noConnectionSubText}>
-            Por favor, verifica tu conexión y vuelve a intentarlo.
-          </Text>
-          <Button
-            title="Reintentar"
-            onPress={() => {
-              console.log('Usuario presionó Reintentar.');
-              NetInfo.fetch().then((state) => {
-                setIsConnected(state.isConnected ?? false);
-                console.log('Resultado de reintentar conexión:', state.isConnected);
-              });
-            }}
-          />
+        <SafeAreaView style={styles.container}>
+          <ErrorView />
         </SafeAreaView>
       </SafeAreaProvider>
     );
@@ -315,11 +365,9 @@ const App: React.FC = () => {
           allowsBackForwardNavigationGestures
           style={styles.webview}
           geolocationEnabled={true}
-          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) 
-  AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e 
-  Safari/602.1"
+          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1"
           cacheEnabled={true}
-
+          incognito={false} // Desactivar modo incógnito para mejorar el caché
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -377,6 +425,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   noConnectionSubText: {
+    fontSize: 16,
+    color: '#555555',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  errorSubText: {
     fontSize: 16,
     color: '#555555',
     textAlign: 'center',

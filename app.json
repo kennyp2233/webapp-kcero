@@ -26,10 +26,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.reactjs.native.example.KceroApp",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Esta aplicación necesita acceder a tu ubicación para mostrar contenido relevante.",
-        "NSCameraUsageDescription": "Se requiere acceso a la cámara.",
-        "NSPhotoLibraryUsageDescription": "Se requiere acceso a la galería de fotos.",
-        "CFBundleDevelopmentRegion": "en",
+        "NSLocationWhenInUseUsageDescription": "Esta aplicación solicita tu ubicación una sola vez al iniciar la app o al completar el checkout para calcular correctamente el lugar de entrega de tu pedido. La información de ubicación se almacena de forma segura en nuestros servidores y se elimina automáticamente al completar el pedido.",
+        "CFBundleDevelopmentRegion": "es",
         "CFBundleIconName": "AppIcon",
         "UILaunchStoryboardName": "LaunchScreen",
         "UIRequiredDeviceCapabilities": [
